@@ -1,4 +1,8 @@
+[TOC]
+
 # 数据结构
+
+
 
 ***定义***：数据结构是相互之间存在一种或多种特定关系的数据元素的集合
 
@@ -73,6 +77,8 @@ O(1)<O(log~a~n)<O(n)<O(n*log~a~n)<O(n^2^)<O(n^3^)<O(2^n^)<O(n!)<O(n^n^)\
 
 ## 线性表
 
+### 线性表的顺序储存结构
+
 1. 定义：零个或多个数据元素组成的有限序列(数据类型相同)
 
 2. a~1~、a~2、~……、a~i-1~、a~i~、a~i+·~、……、a~n~中
@@ -105,9 +111,9 @@ struct
 
    LOC(a~i+1~)=LOC(a~i~)+sizeof(a的类型)   <-----O(1)
 
-6. 插入与删除
+#### 插入算法思路
 
-   #### 插入算法思路：
+   
 
    1. 插入位置不合理             ----->异常
    2. length>MAXSIZE          ----->异常或动态增加容量
@@ -115,9 +121,9 @@ struct
    4. 插入    length++
 
       ~~~C
-      实现：
-      INitial condition：顺序线性表已存在且1<=i<=length
-      result：在第i项插入e.length++
+      //实现：
+      //Initial condition：顺序线性表已存在且1<=i<=length
+      //result：在第i项插入e.length++
           struct
           {
              int data[MAXSIZE];
@@ -142,7 +148,9 @@ struct
 
    时间复杂度为O(n)
 
-####  删除算法的思路：
+#### 删除算法的思路
+
+
 
 1. 删除位置不合理             ----->异常
 2. 取出删除元素
@@ -150,9 +158,9 @@ struct
 4. 删除    length--
 
 ~~~C
-实现：
-INitial condition：顺序线性表已存在且1<=i<=length
-result：删除第i个数据元素.length--
+//实现：
+//Initial condition：顺序线性表已存在且1<=i<=length
+//result：删除第i个数据元素.length--
     struct
     {
        int data[MAXSIZE];
@@ -180,26 +188,236 @@ result：删除第i个数据元素.length--
 
 7. 存储或删除数据时时间复杂度都为O(1)而插入或删除时时间复杂度都为O(n)
 
-| 优点                               | 缺点                                         |
-| ---------------------------------- | -------------------------------------------- |
+|                优点                | 缺点                                         |
+| :--------------------------------: | -------------------------------------------- |
 | 无需为元素之间逻辑关系增加储存空间 | 插入和删除需要移动大量元素                   |
-| 可以快速存取表中任意元素           | 线性长度变化较大时难以确定容量，浪费储存空间 |
+|      可以快速存取表中任意元素      | 线性长度变化较大时难以确定容量，浪费储存空间 |
 
 
 
 
 
+### 线性表链式存储结构
+
+结点(node)由数据域与指针域组成，指针域存储的是后继结点的地址
+
+第一个结点的地址称为头指针，最后一个结点的指针域为NULL
+
+通常在第一个结点之前附设一个头结点(可不存储数据，但也可以存储链表长度)
+
+#### 头指针与头结点的异同
+
+| 头指针                                                       | 头结点                                                       |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 头指针是指向第一个结点的指针，如果有头结点，则是指向头结点的指针 | 为了操作的统一和方便而设立，数据与一般无意义，但也可存储链表长度 |
+| 头指针具有标识作用，常用头指针冠以链表的名字                 | 有了头结点，第一个结点与其他结点的插入与删除的操作可以统一   |
+| 无论链表是否为空，头指针均不为空，头指针是链表必要元素       | 头结点不一定是链表必要元素                                   |
+
+~~~C
+typedef struct Node
+{
+    ElemType data；               //->数据域
+    struct Node* next；           //->指针域
+}Node；
+ typedef struct Node* LinkList;    //->头指针
+~~~
+
+#### 获取链表第i个数据的算法思路
+
+1. 声明一个指针p指向链表的第一个结点，初始化j从1开始
+2. 当j<i时遍历链表，指针p向后移动，j++
+3. 若最终p为NULL，则说明第i个结点不存在
+4. 查找成功则返回该结点的数据p->data
+
+~~~C
+//实现：
+//Initial condition：单链表表已存在且1<=i<=Listlength(L)
+//result：用e返回第i个结点的数据
+bool GetElem(LinkList L,int i,ElemType *e)
+{
+    LinkList p;
+    p=L->next;
+    while(p&&j<i)
+    {
+        p=p->next;
+        ++j;
+    }
+    if(!p||j>i)  return false;
+    *e=p->data;
+    return true;
+} 
+~~~
+
+***核心思想：工作指针后移***
+
+最坏情况 时间复杂度为O(n)
+
+#### 单链表第i个元素插入结点的算法思路
+
+1. 声明一个指针p指向链表头结点，初始化j=1
+
+2. 当j<i时，遍历链表，让p向后移动j++
+
+3. 若p为NULL，说明第i个结点不存在
+
+4. 查找成功，在系统中生成一个空结点s
+
+5. 将数据元素e复制给s->data
+
+6. 单链表插入标准语句：
+
+   ~~~C
+   s->next=p->next;
+   
+   p->next=s;  //顺序不能调换，否则会丢失指针
+   ~~~
+
+   ~~~C
+   //实现：
+   //initial condition：单链表L已存在，1<=i<=Listlength(L)
+   //result: L中的第i个结点位置之前插入新的数据元素e，Listlength(L)++
+   bool ListInsert(LinkList *L,int i, ElemType e)
+   {
+       LinkList p,s;
+       p=*L;
+       int j=1;
+       while(p&&j<i)
+       {
+           p=p->next;
+           ++j；
+       }
+       if（!p||j>i) return false; //j>1防止i<1
+       s=(LinkList*)malloc(sizeof(Node));
+       s->data=e;
+       s->next=p->next;
+       p->next=s;
+       return tue;
+   }
+   ~~~
+
+   时间复杂度O(n)
+
+#### 单链表第i个数据删除结点的算法思路
+
+1. 声明一个指针p指向头结点，初始化j=1
+
+2. 当j<i时遍历单链表，指针p向后移动，j++
+
+3. 若p=NULL,说明第i个结点不存在
+
+4. 若查找成功，则声明一个指针q储存要删除的结点
+
+   且q=p->next
+
+5. p->next=q->next;
+6. 将q结点中的数据赋值给e返回
+7. 释放q结点
+
+~~~C
+//实现：
+//Initial condition：单链表L已存在，1<=i<=ListLength(L)
+//result: 删除L的第i个结点，并用e返回其值，ListLength(L)--
+bool ListDelete(LinkList *L,int i,ElemType *e)
+{
+    int j=1;
+    LinList p,s;
+    p=*L;
+    while(j<i&&p->next)
+    {
+        p=p->next;
+        ++j;
+    }
+    if(j>i||!(p->next)) return false;
+    q=p->next;
+    p->next=q->next;
+    *e=q->data;
+    free(q);
+    return true;
+}
+~~~
+
+时间复杂度O(n)
+
+#### 初始化单链表
+
+~~~C
+typedef struct Node
+{
+    ElemType data；               //->数据域
+    struct Node* next；           //->指针域
+}Node；
+ typedef struct Node* LinkList;  //LinkList是头指针类型
+LinList *L;                //头指针的指针，方便传递以修改链表
+*L=NULL；
+
+~~~
 
 
 
+#### 单链表的整表创建的算法思路
 
+1. 声明一个指针p和计数变量i
+2. 初始化一个空链表L
+3. 让L的头结点的指针指向NULL
+4. 循环
+   1. 生成一个新结点赋值给p
+   2. 随机生成一个数给p的数据域赋值
+   3. 将结点放到末尾
 
+~~~C
+void CreateList(LinkList* L,int n)
+{
+    LinkList p,new;
+    int i;
+    srand(time(0));
+    *L=(LinkList)malloc(Node);
+    n=*L;
+    for(i=0;i<n;i++)
+    {
+        p=(LinkList)malloc(sizedof(Node));
+        p->data=rand()%100+1;//随机生成100以内的数
+        n->next=p;
+        new=p;
+    }
+    new->next=NULL;
+}
+~~~
 
+#### 单链表的整表删除算法思路
 
+1. 声明一个指针p和q
+2. 将第一个结点赋值给p
+3. 循环：
+   1. 将下一个结点赋值给q
+   2. 释放p
+   3. 将q赋值给p
 
+~~~C
+bool ClearList（LinkList* L）
+{
+    LinkList p,q;
+    p=*L;
+    while(p)
+    {
+        q=p->next;
+        free(p);
+        p=q;
+        
+    }
+    (*L)->next=NULL;
+    return true;
+}
+~~~
 
+单链表结构(c1)Vs顺序储存结构(c2)
 
+|           储存分配方式           |              时间性能              |                         空间性能                         |
+| :------------------------------: | :--------------------------------: | :------------------------------------------------------: |
+|         c2用一段储存单元         |   查找：<br /> c1:O(1)   c2:O(n)   | c1需要预先分配储存空间，<br />分大了，浪费，分少了，溢出 |
+| c1采用链式储存结构，储存单元任意 | 插入和删除:<br />c1:O(n)   c2:O(1) |  单链表不需要预先分配储存空间，<br />元素个数也不受限制  |
 
+结论：
 
-
+1. 如果线性表需要频繁查找，很少进行插入删除操作，应采用顺序存储结构，反之则应采用单链表结构
+2. 线性表中个数较大或者不知大小时，应用单链表结构，无需考虑存储空间的大小问题，反之亦然
 

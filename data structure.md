@@ -188,6 +188,8 @@ struct
 
 7. 存储或删除数据时时间复杂度都为O(1)而插入或删除时时间复杂度都为O(n)
 
+#### 顺序储存结构的优缺点
+
 |                优点                | 缺点                                         |
 | :--------------------------------: | -------------------------------------------- |
 | 无需为元素之间逻辑关系增加储存空间 | 插入和删除需要移动大量元素                   |
@@ -233,7 +235,7 @@ typedef struct Node
 //实现：
 //Initial condition：单链表表已存在且1<=i<=Listlength(L)
 //result：用e返回第i个结点的数据
-bool GetElem(LinkList L,int i,ElemType *e)
+Bool GetElem(LinkList L,int i,ElemType *e)
 {
     LinkList p;
     p=L->next;
@@ -276,7 +278,7 @@ bool GetElem(LinkList L,int i,ElemType *e)
    //实现：
    //initial condition：单链表L已存在，1<=i<=Listlength(L)
    //result: L中的第i个结点位置之前插入新的数据元素e，Listlength(L)++
-   bool ListInsert(LinkList *L,int i, ElemType e)
+   Bool ListInsert(LinkList *L,int i, ElemType e)
    {
        LinkList p,s;
        p=*L;
@@ -317,7 +319,7 @@ bool GetElem(LinkList L,int i,ElemType *e)
 //实现：
 //Initial condition：单链表L已存在，1<=i<=ListLength(L)
 //result: 删除L的第i个结点，并用e返回其值，ListLength(L)--
-bool ListDelete(LinkList *L,int i,ElemType *e)
+Bool ListDelete(LinkList *L,int i,ElemType *e)
 {
     int j=1;
     LinList p,s;
@@ -393,7 +395,7 @@ void CreateList(LinkList* L,int n)
    3. 将q赋值给p
 
 ~~~C
-bool ClearList（LinkList* L）
+Bool ClearList（LinkList* L）
 {
     LinkList p,q;
     p=*L;
@@ -409,7 +411,7 @@ bool ClearList（LinkList* L）
 }
 ~~~
 
-单链表结构(c1)Vs顺序储存结构(c2)
+#### 单链表结构(c1)Vs顺序储存结构(c2)
 
 |           储存分配方式           |              时间性能              |                         空间性能                         |
 | :------------------------------: | :--------------------------------: | :------------------------------------------------------: |
@@ -420,4 +422,114 @@ bool ClearList（LinkList* L）
 
 1. 如果线性表需要频繁查找，很少进行插入删除操作，应采用顺序存储结构，反之则应采用单链表结构
 2. 线性表中个数较大或者不知大小时，应用单链表结构，无需考虑存储空间的大小问题，反之亦然
+
+### 静态链表
+
+1. 用数组代替指针，创建一个结构体数组，data储存数据，cur储存后继元素的下标，cur称为游标
+
+2. 第一个元素与最后一个元素不存储数据
+
+3. 第一个元素，即下标为0的元素的cur储放第一个元素的下标(1)
+
+4. 最后一个***有值***元素的游标为0，而数组最后一个元素游标为第一个元素的下标，相当于单链表中的头结点作用，当链表为空时为0
+
+   ***李姐***：备用链表的第一个元素的下标为为L[0].cur,数据链表第一个元素下标为L[MAXSIZE-1].cur
+
+#### 初始化静态链表
+
+   ~~~C
+   #define MAXSIZE 1000
+       typedof struct
+   {
+       ElemType data;
+       int cur;        
+   }Component;
+   Component space[MAXSIZE];
+   //组成一条备用链表
+   Bool InitList(Component space)
+   {
+       int i;
+       for(i=0;i<MAXSIZE;i++)
+           space[i].cur=++i;
+       space[MAXSIZE-1].cur=0;
+       return true;
+   }
+   ~~~
+
+#### 静态链表的插入
+
+   1. 原理：为了辨明哪些分量未被使用，将所有未被使用过的以及已经删除的份量用游标链成一个备用的链表，每次插入，从备用链表上取得第一个结点作为新结点
+
+      ~~~C
+      //若备用链表非空，则返回分配的结点下标，否则返回0
+      int Malloc_SLL(Component space)
+      {
+          int  i=space[0].cur;
+          if(space[0].cur)
+              space[0].cur=space[i].cur;
+          return i;
+      }
+      //在第i个元素之前插入新的数据元素e
+      Bool ListInsert(Component L,int i,ElemType e)
+      {
+          int j,k,l;
+          k=MAXSIZE-1;
+          if(i<1||i>ListLength(L)+1) return false;
+          j=Malloc_SLL(L);//获得空闲分量的下标
+          if(j)
+          {
+              L[j].data=e;
+              for(l=1;l<=i-1;l++)
+                  k=L[k].cur;//k是最后一个元素，存储的第一个有值元素的
+              L[j].cur=L[k].cur;
+              L[k].cur=j;
+              return true;
+          }
+          reture false;
+      }
+      ~~~
+      
+      
+
+#### 静态链表的删除操作
+
+~~~C
+//删除L中的第i个数据
+Bool ListDelete(Component L,int i)
+{
+    int j,k;
+    if(i<1||i>ListLength[L]) return false;
+    for(j=MAX_SIZE-1;j<=i-1;j++)
+       k=L[k].cur;
+    j=L[k].cur;
+    L[k].cur=L[j].cur;
+    free_SSL(L,j);
+    return true;   
+}
+void Free_SSL(Component space,int k)
+{
+    space[k].cur=space[0].cur;
+    space[0].cur=k;
+}
+//返回L中数据个数
+int ListLength(Component L)
+{
+    int j=0;
+    int i=L[MAXSIZE-1].cur;
+    while(i)
+    {
+        i=L[i].cur;
+        j++;
+    }return j;
+}
+~~~
+
+#### 静态链表优缺点
+
+|                             优点                             |                     缺点                     |
+| :----------------------------------------------------------: | :------------------------------------------: |
+| 在插入与删除操作时，只需要修改游标，<br />不需要移动元素从而改进了顺序储存结构中的需要移动大龄啊元素的缺点 | 没有解决连续储存分派带来的表长难以确定的问题 |
+|                              /0                              |       失去了顺序储存结构随机存取的特性       |
+
+ALL in ALL：静态链表是给没指针的高级语言设计的一种实现单链表能力的方法
 

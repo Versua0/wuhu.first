@@ -75,6 +75,18 @@ while（count<n)
 S(n)=O(f(n))    n为问题的规模  f(n)为语句关于n所占储存空间函数
 O(1)<O(log~a~n)<O(n)<O(n*log~a~n)<O(n^2^)<O(n^3^)<O(2^n^)<O(n!)<O(n^n^)\
 
+### 递归
+
+1. 定义：在高级语言中，调用自己和其他函数并没有本质的区别。我们把一个直接调用自己或通过一系列的调用语句间接地调用自己的函数，称为递归函数。
+
+2. 每个递归定义必须至少有一个条件(防止无限递归)用作退出
+
+   **迭代使用的是循环结构，而递归使用的是选择结构**，使程序的结构更清晰、更简洁
+
+   但使用大量的递归调用会建立函数的副本，耗费大量的时间和内存
+
+3. 递归过程的返回的顺序是它前行顺序的逆序
+
 ## 线性表
 
 ### 线性表的顺序储存结构
@@ -573,8 +585,375 @@ p->next=s;
 //要删除结点p
 p->prior->next=p->next;
 p->next->prior=p->prior;
-free(p);/顺序没特别要求
+free(p);//顺序没特别要求
+~~~
+
+### 栈与队列
+
+1. 栈的定义：**栈**是限定只能在表尾进行插入与删除操作的线性表，允许插入和删除的一端叫栈顶，另一端则为栈底，不含任何数据的叫空栈。栈又称为“后进后出”的线性表，栈的插入操作(push)叫进栈，也叫压栈、入栈，栈的删除操作(pop)叫出栈，也叫弹栈
+
+   在不是所有元素都进栈的情况下，事先进去的栈也可以出栈，只要保证是在栈顶就ok
+
+   比如  1进，1出，2进，3进，3出，2出
+
+2. **队列**是值允许在一端进行插入操作、在另一端进行删除操作的线性表
+
+#### ADT 栈(stack)
+
+1. Data：同线性表。相邻元素具有前驱和后继的关系
+
+2. Operation
+
+   InitStack(*S):初始化操作，建立一个空栈
+
+   DestoryStack(*S):若栈存在，销毁
+
+   ClearStack(*S):清空栈
+
+   StackEmpty(S)：检验栈是否为空，若为空返回true，否则返回false
+
+   GetTop(S,*e):若栈存在且非空,用e返回S的栈顶元素
+
+   Push(*S,e):若栈存在，插入新元素e到栈中
+
+   Pop(**S*,*e):删除栈S中的栈顶元素，并用e返回其值   
+
+   StackLength(S):返回栈中元素个数
+
+   **下标为0的一端作为栈底，定义一个top指示栈顶元素的位置，top<StackSize,top=0时栈有一个元素，因此空栈的判断条件时top=-1**
+   
+   ~~~C
+   //栈的结构定义
+   typedef int SElemType;//假设数据类型为int
+   typedef struct
+   {
+       SElemType data[MAXSIZE];
+       int top;
+   }SqStack;
+   ~~~
+   
+
+#### 栈的顺序储存结构及实现
+
+##### 进栈与出栈操作
+
+###### 进栈操作
+
+   ~~~C
+   Bool Push(SqStack *S,SElemType e)
+   {
+       if(S->top==MAXSIZE-1)
+           return false;
+       s->top++;
+       S->data[S->top]=e;
+       return true; //先提高栈的“容量”
+   }
+   ~~~
+
+###### 出栈操作
+
+   ~~~C
+   Bool Pop(SqStack *S,SElemType *e)
+   {
+       if(S->top==-1)
+           return flase;
+       *e=S->data[S->top];
+       S->top--;
+       return true;    
+   }
+   ~~~
+
+   时间复杂度都为O(1)
+
+但栈用的时数组储存数据，一样有数组大小难以确定的缺陷，因此使用一个数组来储存两个相同类型的栈(合租)
+
+​          两个栈的栈底分别为下标为0处以及下标为n-1处，空栈分别表现为top1=-1，top2=n 栈顶双向奔赴
+
+​          栈满：top1+1=top2
+
+​       
+
+##### 两栈共享空间结构
+
+但栈用的时数组储存数据，一样有数组大小难以确定的缺陷，因此使用一个数组来储存两个相同类型的栈(合租)
+
+两个栈的栈底分别为下标为0处以及下标为n-1处，空栈分别表现为top1=-1，top2=n 栈顶双向奔赴，***通常两个栈的空间需求具有相反关系时才有比较大的意义，不然一样很快溢出***
+
+栈满：top1+1=top2
+
+***前提条件***：两个栈具有相同的数据类型
+
+~~~C
+typedef struct
+{
+    SElemType data[MAXSIZE];
+    int top1;
+    int top2;
+}SqDoubleStack;
+~~~
+
+###### 进栈操作
+
+比单栈多了一个StackNumber，判断是加入到栈1还是栈2
+
+~~~C	
+Bool Push(SqDoubleStack *S,SElemType e,int StackNumber)
+{
+    if(S->top1+1==S->top2)
+        return false;
+    if(StackNumber==1)
+    {
+        top1++;
+        S->data[S->top1]=e;
+    }
+    if(StackNumber==2)
+    {
+        top1--;
+        S->data[S->top2]=e;
+    }
+}
+~~~
+
+###### 出栈操作
+
+~~~C
+Bool Pop(SqDoubleStack *S,SElemType *e,int StackNumber)
+{
+    if(stackNumber==1)
+    {
+        if(S->top1==-1)
+            return false;
+        *e=S->data[top1--];
+    }
+    else if(StackNumber==2)
+    {
+        if(S->top2==n)
+            return false;
+        *e=S->data[top2++];
+    }
+    return true;
+}
+~~~
+
+#### 栈的链式存储结构及实现
+
+链栈不存在栈满的情况，除非内存寄了
+
+##### 链栈的结构
+
+~~~C
+typedef struct StackNode//StackNode不是结构体名(struct StackNode),因为要套娃，typedef还没用，需要一个ID
+{
+    SelemType data;
+    struct StackNode *next;
+}StackNode, *LinkStackPtr;
+typedef struct 
+{
+    LinkStackPtr top;
+    int count;
+}LinkStack;
+~~~
+
+##### 进栈操作
+
+~~~C
+Bool Push(LinkStack *S,SElemType e)
+{
+    LinkStackPtr s=(LinkStackPtr)malloc(sizeof(StackNode));
+    s->data=e;
+    s->next=S->top;
+    S->top=s;
+    S->count++;
+    return true;
+}
+~~~
+
+##### 出栈操作
+
+~~~C
+Bool Pop(LinkStack *S,SElemType *e)
+{   if(S->count==0)//if(StackEmpty(*S))
+             return false;
+    LinkStackPtr p;
+    *e=S->top->data;
+    p=S->top;
+    S->top=S->top->next;
+    free(p);
+    S->count--;
+    return true;
+}
+~~~
+
+时间复杂度均为O(1)
+
+#### 对比顺序栈与链栈
+
+1. 时间复杂度均为O(1)
+2. 顺序栈需要事先知道一个长度，存在空间浪费问题，优势是存取时方便
+3. 链栈要求每个元素都有指针域，增加了一些内存占用，但是对于栈的长度无限制
+
+#### 栈的作用
+
+栈的引入简化了程序设计的问题，不用像数组一样过多去关注下标增减等细节问题，使得思考范围减少，而且Java、C#等都有对栈的封装，很方便
+
+#### 栈的应用
+
+##### 1.在程序设计语言中实现了[递归](#递归)
+
+**在退回过程中，可能要执行某些动作(包括回复在前行中储存起来的某些数据)：**
+
+在前行阶段，对于每一层递归，函数的局部变量、参数值、以及返回地址都被压入栈中。在退回阶段，位于栈顶的局部变量、参数值和返回地址被弹出，用于返回调用层次中执行代码的其余部分
+
+不过对于高级语言来说，由系统管理这个栈
+
+##### 2.四则运算表达式求值
+
+1. 将中缀表达式转化为后缀表达式
+2. 将后缀表达式进行运算(这里栈用来进出运算的数字)
+
+###### 后缀(逆波兰)表示法定义
+
+对于"9+(3-1)×3+10/2",用后缀表示法："9 3 1-3×+10 2/+"
+
+规则：从左到右遍历表达式的每个数字和符号，遇到数字就进栈，遇到符号就将处于栈顶的两个数字出栈，进行运算，运算结果进栈。直到最终获得结果
+
+###### 中缀表达式转后缀表达式
+
+平时使用的"9+(3-1)×3+10/2"称为中缀表达式
+
+***转为后缀表达式的规则：***
+
+从左到右遍历中缀表达式的每个数字和符号，若是数字就输出，称为后缀表达式的一部分。若是符号，则判断其与栈顶符号的优先级，是右括号或优先级**不高于(<=)**栈顶符号(乘除优先加减)则将栈顶元素依次出栈并输出[当判断为')'时，直到'('出栈为止]，并将当前符号进栈，一直到最终输出后缀表达式为止(遍历完后依次出栈)
+
+#### 队列
+
+1. 死机的时候，要等计算机酒醒了之后才会进行刚刚死机的所有操作，而客服系统是上一个客户结束之后再接下一个。操作系统与客服系统中，都应用了一种数据结构来实现先进先出的排队系统------队列
+
+2. ***队列的定义：***只允许在一端进行插入操作，而在另一端进行删除操作的线性表
+
+   即先进先出(First in First Out),简称FIFO的线性表
+
+3. 允许插入的一端称为队尾，允许删除的一端称为队头
+
+#### ADT 队列(Queue)
+
+Data:同线性表。元素具有相同的类型，相邻元素具有前驱后后继关系
+
+Operation：
+
+~~~C
+Qperation：
+InitQueue(*Q)：初始化操作，建立一个空队列Q
+DestroyQueue(*Q)：若队列Q存在，销毁
+ClearQueue(*Q)：将队列Q清空
+QueueEmpty(Q):若队列为空，返回true，否则返回false
+GetHead(Q,*e):若队列Q存在且非空，用e返回队列Q的队头元素
+EnQueue(*Q,e):若队列Q存在，插入新元素e到队列Q中并成为队尾元素
+DeQueue(*Q,*e):删除队列Q中的队头元素，并用e返回其值ueueLength(*Q):返回队列Q的元素个数
+~~~
+
+#### 顺序储存结构以及实现循环队列的优化
+
+##### 队列顺序存储的不足
+
+1. 入队列的操作只需在队尾增加一个元素，时间复杂度为O(1)
+
+   出列使在队头，即下标为0的位置，所有元素都得向前移动，保证队头不为空，时间复杂度为O(n)
+
+2. 而如果不限制队列的元素必须存储在数组的前n个单元，出队性能将会大大提高
+
+   但为了避免只有一个元素的时候，队头与队尾重合，引入两个指针，front指针指向队头元素，rear指针指向队尾元素的下一位置，当front=rear时为空队列，但是如果队列容易假溢出(队列前面还有空间，但是不用)，队列后端满的时候，rear就会指向数组外
+
+##### 循环队列的定义
+
+后面满了就从头再来，即头尾相接的循环，rear改为指向下标为0的位置，但是队列满了的时候还是会出现front=rear的情况，无法判断是队列为空还是满
+
+1. 设置一个标志变量flag，当front==rear，且flag=0时队列为空
+
+   当front==rear且flag=1时队列为满
+
+2. 当队列为空时，条件为front=rear，当队列为满时修改其条件，保留一个元素空间，即队列未满时，数组里面还存在一个空闲单元
+
+   如果队列的**最大尺寸**为QueueSize，则队列满的条件为***==(rear+1)%QueueSize======front==***
+
+   **李姐**：如果rear在front前面，则rear+1<QueueSize,即rear+1==front
+
+   ​             如果rear在front后面则rear+1=QueueSize，且front=0。
+
+   
+
+   因此通用的队列长度公式为：***==(rear-front+QueueSize)%QueueSize==***
+
+   当rear>front时，队列长度为rear-front
+
+   而当rear<front时  队列长度为QueueSize-front+rear(总小于QueueSize)
+   
+   指针到最后的判定：==(Q->rear(或front)+1)%QueueSize==，数组最后一位为QueueSize-1
+
+##### 循环队列的顺序储存结构
+
+~~~C
+//假定QElemType类型为int
+tyepdef int QElemType;
+typedef struct
+{
+    QElemType data[MAXSIZE];
+    int front;//头指针
+    int rear;//尾指针，若队列不为空，则指向队列尾元素的下一位置
+}SqQueue;
+~~~
+
+##### 循环队列的初始化
+
+~~~C
+Bool InitQueue(SqQueue *Q)
+{
+    Q->front=0;
+    Q->rear=0;
+    return true;
+}
+~~~
+
+##### 求队列当前长度
+
+~~~C
+int QueueLength(SqQueue Q)
+{
+    return(Q.rear+MAXSIZE-Q.front)%MAXSIZE;
+}
+~~~
+
+##### 入队列操作
+
+~~~C
+Bool EnQueue(SqQueue *Q,QElemType e)
+{
+    if((Q->rear+1)%MAXSIZE==Q->front)
+        return false;
+    Q->data[Q->rear]=e;
+    Q->rear=(Q->rear+1)%MAXSIZE;//rear指针向后移动，若到最后则转到数组头部
+    return true;
+}
+~~~
+
+##### 出队列操作
+
+~~~C
+Bool DeQueue(SqQueue *Q,QElemType *e)
+{
+    if(Q->rear==Q->front)
+        return false;
+    *e=Q->data[Q->front];
+    Q->front=(Q->front+1)%MAXSIZE;//若到最后则转到数组头部
+    return OK;
+}
 ~~~
 
 
+
+单是顺序储存结构，时间性能并不高，但是循环队列又可能溢出
+
+#### 链式储存结构及实现
+
+队列的链式储存结构即线性表的单链表，不过只能尾进头出，为了操作上的方便，将队头指针指向链队列的头结点，队尾指针指向终端结点。*空队列时，front和rear都指向头结点*
 

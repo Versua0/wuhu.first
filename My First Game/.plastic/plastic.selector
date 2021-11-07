@@ -1,0 +1,4 @@
+repository "My First Game@ssl://wechat_os_qy0zah-ztnnu9vldbylmx0jm4@sh02-plasticscm.unity.cn:8787"
+  path "/"
+    smartbranch "/main/1617626942" 
+     

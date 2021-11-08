@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UnityEngine.UI;
 public class playcontrol : MonoBehaviour
 {
     private Rigidbody2D rb;
@@ -10,6 +10,8 @@ public class playcontrol : MonoBehaviour
     public Transform groundCheck;
     public LayerMask ground;
     public int cherry;
+
+    public Text CherryNum;
 
 
     // Start is called before the first frame update
@@ -28,6 +30,7 @@ public class playcontrol : MonoBehaviour
        
         
     }
+    //移动
     void Movement()
     {
         float horizontalMove = Input.GetAxisRaw("Horizontal");
@@ -38,17 +41,19 @@ public class playcontrol : MonoBehaviour
             transform.localScale = new Vector3(horizontalMove, 1, 1);
             anim.SetFloat("running", Mathf.Abs(horizontalMove));
         }
-        
-        if (Input.GetButton("Jump"))
+        //跳跃
+        if (Input.GetButton("Jump")&& coll.IsTouchingLayers(ground))
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpforce);
             anim.SetBool("jumping", true);
         }
+        //静止
         if(horizontalMove==0)
         {
             anim.SetFloat("running",0 );
         }
     }
+    //切换动画
     void SwitchAnim()
     {
         anim.SetBool("idling", true);
@@ -71,12 +76,14 @@ public class playcontrol : MonoBehaviour
         }
 
     }
+    //收集物品
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "Collection")
         {
             Destroy(collision.gameObject);
             cherry += 1;
+            CherryNum.text = cherry.ToString();
         }
     }
 }

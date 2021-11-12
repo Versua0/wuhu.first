@@ -2,20 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemies : MonoBehaviour
+public class Enemies : Enemy
 {
     public Rigidbody2D rb;
     public Transform leftpoint, rightpoint;
-    public Animator Anim;
+    //public Animator Anim;
     public float speed,jumpforce;
     public LayerMask Ground;
     public Collider2D Coll;
     private float leftx, rightx;
     private bool Faceleft = true;
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         Coll.GetComponent<Collider2D>();
-        Anim.GetComponent<Animator>();
+       // Anim.GetComponent<Animator>();
         rb.GetComponent<Rigidbody2D>();
         
         transform.DetachChildren();
@@ -78,5 +79,13 @@ public class Enemies : MonoBehaviour
             Anim.SetBool("idle", true);
         }
         }
-    
+    public void death()
+    {
+        Destroy(gameObject);
+    }
+    public void JumpOn()
+    {
+
+        Anim.SetTrigger("death");
+    }
 }

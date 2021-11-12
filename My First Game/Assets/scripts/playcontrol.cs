@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 public class playcontrol : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private Animator anim;
+    public Rigidbody2D rb;
+    public Animator anim;
     public Collider2D coll;
 
     public float speed, jumpforce;
@@ -16,7 +16,7 @@ public class playcontrol : MonoBehaviour
 
 
     // Start is called before the first frame update
-    void Start()
+     void  Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
@@ -55,6 +55,7 @@ public class playcontrol : MonoBehaviour
         {
             anim.SetFloat("running",0 );
         }
+        Couching();
     }
     //ÇÐ»»¶¯»­
     void SwitchAnim()
@@ -109,9 +110,10 @@ public class playcontrol : MonoBehaviour
     {
         if(collision.gameObject.tag == "Enemies")
         {
-            if(anim.GetBool("falling"))
+            Enemies enemy = collision.gameObject.GetComponent<Enemies>();
+            if (anim.GetBool("falling"))
             {
-                Destroy(collision.gameObject);
+                enemy.JumpOn();
                 rb.velocity = new Vector2(rb.velocity.x, jumpforce);
                 anim.SetBool("jumping", true);
             }
@@ -126,7 +128,18 @@ public class playcontrol : MonoBehaviour
                 ishurt = true;
             }
         }
+        
     }
 
-
+    void Couching()
+    {
+        if (Input.GetButtonDown("Couch"))
+        {
+            anim.SetBool("Couching", true);
+        }
+        else if (Input.GetButtonUp("Couch"))
+        {
+            anim.SetBool("Couching", true);
+        }
+    }
 }

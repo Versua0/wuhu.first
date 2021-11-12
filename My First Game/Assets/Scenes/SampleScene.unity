@@ -1073,7 +1073,7 @@ Transform:
   m_Children:
   - {fileID: 1709188752}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &808396186
 PrefabInstance:
@@ -2000,7 +2000,13 @@ MonoBehaviour:
   rb: {fileID: 1449969730}
   leftpoint: {fileID: 318981518}
   rightpoint: {fileID: 916154684}
+  Anim: {fileID: 1449969728}
   speed: 5
+  jumpforce: 5
+  Ground:
+    serializedVersion: 2
+    m_Bits: 8
+  Coll: {fileID: 1449969729}
 --- !u!4 &1499003425 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8963730622877914972, guid: 418e90ee9fefcd5438efcf4ecf985ea0, type: 3}
@@ -2199,7 +2205,7 @@ Transform:
   - {fileID: 227796179}
   - {fileID: 1799320271}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1655708336 stripped
 Transform:

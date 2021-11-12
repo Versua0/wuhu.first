@@ -6,12 +6,18 @@ public class Enemies : MonoBehaviour
 {
     public Rigidbody2D rb;
     public Transform leftpoint, rightpoint;
-    public float speed;
+    public Animator Anim;
+    public float speed,jumpforce;
+    public LayerMask Ground;
+    public Collider2D Coll;
     private float leftx, rightx;
-    private bool Faceleft=true;
+    private bool Faceleft = true;
     void Start()
     {
+        Coll.GetComponent<Collider2D>();
+        Anim.GetComponent<Animator>();
         rb.GetComponent<Rigidbody2D>();
+        
         transform.DetachChildren();
         leftx = leftpoint.position.x;
         rightx = rightpoint.position.x;
@@ -22,31 +28,55 @@ public class Enemies : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Movement();
+        Switch();
+        
     }
     void Movement()
     {
         if (Faceleft)
-        {
-            rb.velocity = new Vector2(-speed, rb.velocity.y);
-            if (transform.position.x < leftx)
+        {  if (Coll.IsTouchingLayers(Ground))
             {
-                
-                transform.localScale = new Vector3(-1, 1, 1);
-                Faceleft = false;
+                Anim.SetBool("jumping", true);
+                rb.velocity = new Vector2(-speed, jumpforce);
             }
+                if (transform.position.x < leftx)
+                {
 
+                    transform.localScale = new Vector3(-1, 1, 1);
+                    Faceleft = false;
+                }
+            
         }
         else
         {
-            rb.velocity = new Vector2(speed, rb.velocity.y);
+            if (Coll.IsTouchingLayers(Ground))
+            {
+                Anim.SetBool("jumping", true);
+                rb.velocity = new Vector2(speed, jumpforce);
+            }
             if (transform.position.x > rightx)
             {
-                
+
                 transform.localScale = new Vector3(1, 1, 1);
                 Faceleft = true;
             }
         }
     }
-
+    void Switch()
+        {
+        if(Anim.GetBool("jumping"))
+        {
+            if(rb.velocity.y<0.1)
+            {
+                Anim.SetBool("jumping", false);
+                Anim.SetBool("falling", true);
+            }
+        }
+        if(Coll.IsTouchingLayers(Ground)&&Anim.GetBool("falling"))
+        {
+            Anim.SetBool("falling", false);
+            Anim.SetBool("idle", true);
+        }
+        }
+    
 }
